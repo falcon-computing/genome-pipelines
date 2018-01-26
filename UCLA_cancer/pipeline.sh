@@ -22,8 +22,7 @@ platform=Illumina
 library=$i
 
 echo "ID: $id"
-temp_dir=${tmp_dir}/$id
-mkdir -p $temp_dir
+mkdir -p $output_dir/$id
 
 dir=/curr/diwu/release/
 
@@ -42,13 +41,9 @@ cp $dir/fcs-genome/fcs-genome-${suite_version} falcon/bin/fcs-genome
 cp $dir/bwa/bwa-${bwa_version} falcon/tools/bin/bwa-bin
 cp $dir/gatk/GATK-${gatk_version}.jar falcon/tools/package/GenomeAnalysisTK.jar
 
-tar zcfh $dir/falcon-genome-${release_version}.tgz falcon/
+tar zcfh $DIR/falcon-genome-${release_version}.tgz falcon/
 
 source falcon/setup.sh
-
-fastq_file_path=$1
-fastq_files=()
-output_dir=$2
 
 echo "release version ${release_version}"
 echo "fcs-genome version ${suite_version}"
@@ -63,7 +58,7 @@ fcs-genome align \
         --ref $ref_genome \
         --fastq1 ${fastq_file_path}/${i}_1.fastq.gz \
         --fastq2 ${fastq_file_path}/${i}_2.fastq.gz \
-        --output $temp_dir/${id}_aligned.bam \
+        --output $output_dir/${id}_aligned.bam \
         --rg $id --sp $id --pl $platform --lb $library --align-only -f
 
 end_ts=$(date +%s)
@@ -81,8 +76,8 @@ start_ts=$(date +%s)
 
 #Mark Duplicates
 fcs-genome markDup \
-        --input ${temp_dir}/${id}_aligned.bam \
-        --output ${temp_dir}/${id}_marked.bam \
+        --input ${output_dir}/${id}_aligned.bam \
+        --output ${output_dir}/${id}_marked.bam \
         -f
 
 end_ts=$(date +%s)
@@ -99,11 +94,11 @@ echo "STEP 3: Collect Alignment & Insert Size Metrics" >> $out_file
 start_ts=$(date +%s)
 
 # Collect Alignment & Insert Size Metrics
-java -jar $PICARD CollectAlignmentSummaryMetrics R=$ref_genome I=$temp_dir/${id}_marked.bam O=${temp_dir}/alignment_metics.txt
+java -jar $PICARD CollectAlignmentSummaryMetrics R=$ref_genome I=$output_dir/${id}_marked.bam O=${output_dir}/alignment_metics.txt
 
-java -jar $PICARD CollectInsertSizeMetrics INPUT=${temp_dir}/${id}_marked.bam OUTPUT=${temp_dir}/insert_metrics.txt HISTOGRAM_FILE=${temp_dir}/insert_size_histogram.pdf 
+java -jar $PICARD CollectInsertSizeMetrics INPUT=${output_dir}/${id}_marked.bam OUTPUT=${output_dir}/insert_metrics.txt HISTOGRAM_FILE=${temp_dir}/insert_size_histogram.pdf 
 
-$SAMTOOLS depth -a ${temp_dir}/${id}_marked.bam > ${temp_dir}/depth_out.txt
+$SAMTOOLS depth -a ${output_dir}/${id}_marked.bam > ${output_dir}/depth_out.txt
 
 end_ts=$(date +%s)
 echo "Metrics Collection finishes in $((end_ts - start_ts))s" >> $out_file
@@ -115,8 +110,8 @@ start_ts=$(date +%s)
 
 #Indel Realignment 
 fcs-genome indel --ref $ref_genome \
-  --input ${temp_dir}/${id}_marked.bam \
-  --output ${temp_dir}/${id}_realigned.bam -f
+  --input ${output_dir}/${id}_marked.bam \
+  --output ${output_dir}/${id}_realigned.bam -f
 
 end_ts=$(date +%s)
 echo "Indel Realignment finishes in $((end_ts - start_ts))s" >> $out_file
@@ -134,8 +129,8 @@ start_ts=$(date +%s)
 #Call Variants
 fcs-genome htc \
         --ref $ref_genome \
-        --input ${temp_dir}/${id}_realigned.bam \
-        --output $temp_dir/${id}_raw.vcf --produce-vcf -f
+        --input ${output_dir}/${id}_realigned.bam \
+        --output $output_dir/${id}_raw.vcf --produce-vcf -f
 
 if [[ $? -ne 0 ]];then
   echo "Failed haplotype caller"
@@ -153,17 +148,17 @@ start_ts=$(date +%s)
 fcs-genome gatk \
   -T SelectVariants \
   -R $ref_genome \
-  -V ${temp_dir}/${id}_raw.vcf.gz \
+  -V ${output_dir}/${id}_raw.vcf.gz \
   -selectType SNP \
-  -o ${temp_dir}/raw_snps.vcf
+  -o ${output_dir}/raw_snps.vcf
 
 fcs-genome gatk \
   -T SelectVariants \
   -R $ref_genome \
-  -V ${temp_dir}/${id}_raw.vcf.gz \
+  -V ${output_dir}/${id}_raw.vcf.gz \
   -selectType INDEL \
   -selectType INDEL \
-  -o ${temp_dir}/raw_indels.vcf
+  -o ${output_dir}/raw_indels.vcf
 
 end_ts=$(date +%s)
 echo "SNP/Indel Extraction finishes in $((end_ts - start_ts))s" >> $out_file
@@ -177,8 +172,8 @@ start_ts=$(date +%s)
 fcs-genome gatk \
   -T VariantFiltration \
   -R $ref_genome \
-  -V ${temp_dir}/raw_snps.vcf --filterExpression '"QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0"' \
-  --filterName "basic_snp_filter" -o ${temp_dir}/filtered_snps.vcf
+  -V ${output_dir}/raw_snps.vcf --filterExpression '"QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0"' \
+  --filterName "basic_snp_filter" -o ${output_dir}/filtered_snps.vcf
 
 end_ts=$(date +%s)
 echo "SNP Filtration finishes in $((end_ts - start_ts))s" >> $out_file
@@ -192,8 +187,8 @@ start_ts=$(date +%s)
 fcs-genome gatk \
   -T VariantFiltration \
   -R $ref_genome \
-  -V ${temp_dir}/raw_indels.vcf --filterExpression '"QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0"' \
-  --filterName "basic_indel_filter" -o ${temp_dir}/filtered_indels.vcf
+  -V ${output_dir}/raw_indels.vcf --filterExpression '"QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0"' \
+  --filterName "basic_indel_filter" -o ${output_dir}/filtered_indels.vcf
 
 end_ts=$(date +%s)
 echo "Indel Filtration finishes in $((end_ts - start_ts))s" >> $out_file
@@ -206,10 +201,10 @@ start_ts=$(date +%s)
 #BQSR #1
 fcs-genome baserecal \
         --ref $ref_genome \
-        --input ${temp_dir}/${id}_realigned.bam \
-        --output $temp_dir/${id}_recal_data.table \
-        --knownSites ${temp_dir}/filtered_snps.vcf \
-        --knownSites ${temp_dir}/filtered_indels.vcf -f
+        --input ${output_dir}/${id}_realigned.bam \
+        --output $output_dir/${id}_recal_data.table \
+        --knownSites ${output_dir}/filtered_snps.vcf \
+        --knownSites ${output_dir}/filtered_indels.vcf -f
 
 end_ts=$(date +%s)
 echo "Base Recalibration #1 finishes in $((end_ts - start_ts))s" >> $out_file
@@ -222,11 +217,11 @@ start_ts=$(date +%s)
 #BQSR 2
 fcs-genome baserecal \
         --ref $ref_genome \
-        --input ${temp_dir}/${id}_realigned.bam \
-        --output $temp_dir/${id}_post_recal_data.table \
-        --knownSites ${temp_dir}/filtered_snps.vcf \
-        --knownSites ${temp_dir}/filtered_indels.vcf \
-        -O --BQSR $temp_dir/${id}_recal_data.table -f
+        --input ${output_dir}/${id}_realigned.bam \
+        --output $output_dir/${id}_post_recal_data.table \
+        --knownSites ${output_dir}/filtered_snps.vcf \
+        --knownSites ${output_dir}/filtered_indels.vcf \
+        -O --BQSR $output_dir/${id}_recal_data.table -f
 
 end_ts=$(date +%s)
 echo "Base Recalibration #2 finishes in $((end_ts - start_ts))s" >> $out_file
@@ -240,9 +235,9 @@ start_ts=$(date +%s)
 fcs-genome gatk \
   -T AnalyzeCovariates \
   -R $ref_genome \
-  -before $temp_dir/${id}_recal_data.table \
-  -after $temp_dir/${id}_post_recal_data.table \
-  -plots ${temp_dir}/recalibration_plots.pdf
+  -before $output_dir/${id}_recal_data.table \
+  -after $output_dir/${id}_post_recal_data.table \
+  -plots ${output_dir}/recalibration_plots.pdf
 
 end_ts=$(date +%s)
 echo "Covariate Analysis finishes in $((end_ts - start_ts))s" >> $out_file
@@ -255,9 +250,9 @@ start_ts=$(date +%s)
 #Print Reads
 fcs-genome printreads \
         --ref $ref_genome \
-        --bqsr $temp_dir/${id}_recal_data.table \
-        --input ${temp_dir}/${id}_realigned.bam \
-        --output ${temp_dir}/${id}_recal_reads.bam -f
+        --bqsr $output_dir/${id}_recal_data.table \
+        --input ${output_dir}/${id}_realigned.bam \
+        --output ${output_dir}/${id}_recal_reads.bam -f
 
 end_ts=$(date +%s)
 echo "Print Reads finishes in $((end_ts - start_ts))s" >> $out_file
@@ -274,8 +269,8 @@ start_ts=$(date +%s)
 #Call Variants
 fcs-genome htc \
         --ref $ref_genome \
-        --input ${temp_dir}/${id}_recal_reads.bam \
-        --output $temp_dir/${id}_raw_variants_recal.vcf --produce-vcf -f
+        --input ${output_dir}/${id}_recal_reads.bam \
+        --output $output_dir/${id}_raw_variants_recal.vcf --produce-vcf -f
 
 end_ts=$(date +%s)
 echo "Variant Calling finishes in $((end_ts - start_ts))s" >> $out_file
@@ -293,16 +288,16 @@ start_ts=$(date +%s)
 fcs-genome gatk \
   -T SelectVariants \
   -R $ref_genome \
-  -V ${temp_dir}/${id}_raw_variants_recal.vcf.gz \
+  -V ${output_dir}/${id}_raw_variants_recal.vcf.gz \
   -selectType SNP \
-  -o ${temp_dir}/raw_snps_recal.vcf
+  -o ${output_dir}/raw_snps_recal.vcf
 
 fcs-genome gatk \
   -T SelectVariants \
   -R $ref_genome \
-  -V ${temp_dir}/${id}_raw_variants_recal.vcf.gz \
+  -V ${output_dir}/${id}_raw_variants_recal.vcf.gz \
   -selectType INDEL \
-  -o ${temp_dir}/raw_indels_recal.vcf
+  -o ${output_dir}/raw_indels_recal.vcf
 
 end_ts=$(date +%s)
 echo "SNP/Indel Extraction finishes in $((end_ts - start_ts))s" >> $out_file
@@ -316,9 +311,9 @@ start_ts=$(date +%s)
 fcs-genome gatk \
   -T VariantFiltration \
   -R $ref_genome \
-  -V ${temp_dir}/raw_snps_recal.vcf \
+  -V ${output_dir}/raw_snps_recal.vcf \
   --filterExpression '"QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0"'  \
-  --filterName "basic_snp_filter" -o ${temp_dir}/filtered_snps_final.vcf
+  --filterName "basic_snp_filter" -o ${output_dir}/filtered_snps_final.vcf
 
 end_ts=$(date +%s)
 echo "SNP Filtration finishes in $((end_ts - start_ts))s" >> $out_file
@@ -332,9 +327,9 @@ start_ts=$(date +%s)
 fcs-genome gatk \
   -T VariantFiltration \
   -R $ref_genome \
-  -V ${temp_dir}/raw_indels_recal.vcf \
+  -V ${output_dir}/raw_indels_recal.vcf \
   --filterExpression '"QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0"' \
-  --filterName "basic_indel_filter" -o ${temp_dir}/filtered_indels_recal.vcf
+  --filterName "basic_indel_filter" -o ${output_dir}/filtered_indels_recal.vcf
 
 end_ts=$(date +%s)
 echo "Indel Filtration finishes in $((end_ts - start_ts))s" >> $out_file
@@ -346,7 +341,7 @@ start_ts=$(date +%s)
 
 #Annotate SNPs and Predict Effects
 java -jar $SNPEFF \
-  -v -cancer $snpEff_db ${temp_dir}/filtered_indels_recal.vcf > ${temp_dir}/filtered_snps_final.ann.vcf
+  -v -cancer $snpEff_db ${output_dir}/filtered_indels_recal.vcf > ${output_dir}/filtered_snps_final.ann.vcf
 
 end_ts=$(date +%s)
 echo "SNP Annotation finishes in $((end_ts - start_ts))s" >> $out_file
@@ -357,7 +352,7 @@ echo "STEP 18: Coverage Calculation" >> $out_file
 start_ts=$(date +%s)
 
 #Compute coverage
-./cov.sh ${temp_dir}/${id}_recal_reads.bam ${output_dir}
+./cov.sh ${output_dir}/${id}_recal_reads.bam ${output_dir}
 
 end_ts=$(date +%s)
 echo "Coverage Calculation finishes in $((end_ts - start_ts))s" >> $out_file
