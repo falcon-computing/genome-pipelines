@@ -1,8 +1,8 @@
 #!/bin/bash
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
-source $PARENTDIR/globals.sh.template
 
-# global settings
+CURR_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+source $CURR_DIR/globals.sh
+source $FALCON_DIR/setup.sh
 
 out_file="log.out"
 
@@ -23,32 +23,6 @@ library=$i
 
 echo "ID: $id"
 mkdir -p $output_dir/$id
-
-dir=/curr/diwu/release/
-
-# check versions
-suite_version=v1.1.2
-bwa_version=v0.4.0-dev
-gatk_version=3.8
-release_version=v1.1.1
-
-# build folder
-mkdir -p falcon/bin
-cp -r $dir/tools falcon/tools
-cp $dir/common/* falcon/
-
-cp $dir/fcs-genome/fcs-genome-${suite_version} falcon/bin/fcs-genome
-cp $dir/bwa/bwa-${bwa_version} falcon/tools/bin/bwa-bin
-cp $dir/gatk/GATK-${gatk_version}.jar falcon/tools/package/GenomeAnalysisTK.jar
-
-tar zcfh $DIR/falcon-genome-${release_version}.tgz falcon/
-
-source falcon/setup.sh
-
-echo "release version ${release_version}"
-echo "fcs-genome version ${suite_version}"
-echo "bwa version ${bwa_version}"
-echo "gatk version ${gatk_version}"
 
 echo "STEP 1: Alignment to reference" >> $out_file
 start_ts=$(date +%s)
@@ -96,7 +70,7 @@ start_ts=$(date +%s)
 # Collect Alignment & Insert Size Metrics
 java -jar $PICARD CollectAlignmentSummaryMetrics R=$ref_genome I=$output_dir/${id}_marked.bam O=${output_dir}/alignment_metics.txt
 
-java -jar $PICARD CollectInsertSizeMetrics INPUT=${output_dir}/${id}_marked.bam OUTPUT=${output_dir}/insert_metrics.txt HISTOGRAM_FILE=${temp_dir}/insert_size_histogram.pdf 
+java -jar $PICARD CollectInsertSizeMetrics INPUT=${output_dir}/${id}_marked.bam OUTPUT=${output_dir}/insert_metrics.txt HISTOGRAM_FILE=${output_dir}/insert_size_histogram.pdf 
 
 $SAMTOOLS depth -a ${output_dir}/${id}_marked.bam > ${output_dir}/depth_out.txt
 
@@ -343,6 +317,9 @@ start_ts=$(date +%s)
 java -jar $SNPEFF \
   -v -cancer $snpEff_db ${output_dir}/filtered_indels_recal.vcf > ${output_dir}/filtered_snps_final.ann.vcf
 
+mv snpEff_genes.txt ${output_dir}
+mv snpEff_summary.html ${output_dir}
+
 end_ts=$(date +%s)
 echo "SNP Annotation finishes in $((end_ts - start_ts))s" >> $out_file
 echo "Output_file: filtered_snps_final.ann.vcf" >> $out_file
@@ -352,7 +329,7 @@ echo "STEP 18: Coverage Calculation" >> $out_file
 start_ts=$(date +%s)
 
 #Compute coverage
-./cov.sh ${output_dir}/${id}_recal_reads.bam ${output_dir}
+$CURR_DIR/cov.sh ${output_dir}/${id}_recal_reads.bam ${output_dir}
 
 end_ts=$(date +%s)
 echo "Coverage Calculation finishes in $((end_ts - start_ts))s" >> $out_file

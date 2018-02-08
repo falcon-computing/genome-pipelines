@@ -1,13 +1,11 @@
 #!/bin/bash
-
 # global settings
-ref_dir=./ref/
-
+ref_dir=
 ref_genome=$ref_dir/Homo_sapiens_assembly38.fasta
 
-SNPEFF=/curr/niveda/UCLA_pipeline/snpEff/snpEff.jar
-PICARD=falcon/tools/package/picard.jar
-BEDTOOLS=/curr/niveda/bedtools2/bin/bedtools
-SAMTOOLS=samtools
+SNPEFF=
+PICARD=
+BEDTOOLS=
+SAMTOOLS=
 
-tmp_dir=/curr/niveda/UCLA_pipeline/temp_dir
+FALCON_DIR=/usr/local/falcon
