@@ -327,15 +327,33 @@ echo "" >> $out_file
 
 echo "STEP 18: Coverage Calculation" >> $out_file
 start_ts=$(date +%s)
-
+<<com
 #Compute coverage
 $CURR_DIR/cov.sh ${output_dir}/${id}_recal_reads.bam ${output_dir}
+com
+
+#Store list of BAMs from path into list file
+if [ -d "${output_dir}/${id}_recal_reads.bam" ];then
+ for file in $(ls "${output_dir}/${id}_recal_reads.bam")
+  do
+    if [[ $file =~ bam$ ]];then
+      echo "${output_dir}/${id}_recal_reads.bam/$file" >> ${output_dir}/${id}_bamnames.list
+    fi
+  done
+fi
+
+#Use list file as input for BAM coverage calculation
+fcs-genome gatk \
+  -T DepthOfCoverage \
+  -R $ref_genome \
+  -o ${output_dir}/${id}_coverage.cov \
+  -I ${output_dir}/${id}_bamnames.list \
+  --minMappingQuality 20 \
+  --minBaseQuality 20 \
+  -omitBaseOutput
 
 end_ts=$(date +%s)
 echo "Coverage Calculation finishes in $((end_ts - start_ts))s" >> $out_file
-echo "Output_file: coverage.bed" >> $out_file
+echo "Output_file: coverage.cov" >> $out_file
 echo "" >> $out_file
-
-
-
 
