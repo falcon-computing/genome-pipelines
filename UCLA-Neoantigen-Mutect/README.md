@@ -68,3 +68,33 @@ The pipeline can be start with a single argument of the sample id, in a director
 > cd /local/work
 > nohup $SCRIPT_DIR/falcon-run {sample_id} &
 ```
+
+## Benchmarking Results
+Below is a table showing the pipeline performance using a selection of normal-tumor cell pairs. Sample sizes are also given in GigaBases. The majority of the time are spent running Falcon software, with Mutect2 being the most time consuming part.
+
+#### System Configuration
+- AWS EC2 r4.4xlarge instance
+- 500GB EBS Volume (SSD)
+
+#### Performance
+
+**Sample**|**Tumor Gbases**|**Normal Gbases**|**Tumor Pipeline Hrs**|**Normal Pipeline Hrs**|**Mutect2 Hrs**|**Total Hrs**
+:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
+L06|41.7|10.9|3.12|1.59|13.11|17.82
+L17-1|28.0|18.8|1.71|2.42|12.40|16.53
+L17-2|37.6|18.8|2.76|2.43|15.28|20.46
+L19|37.0|28.5|2.58|3.71|15.54|21.83
+L23|16.7|21.3|1.25|2.97|12.63|16.86
+
+#### Cost Analysis
+
+**Sample**|**Total Hrs**|**AWS Cost**|**Falcon Cost**|**Total Cost**
+:-----:|:-----:|:-----:|:-----:|:-----:
+L06|17.82| $20.19 | $13.36 | $33.55
+L17-1|16.53| $18.73 | $12.40 | $31.13
+L17-2|20.46| $23.19 | $15.35 | $38.53
+L19|21.83| $24.73 | $16.37 | $41.10
+L23|16.86| $19.10 | $12.64 | $31.74
+
+### Baseline Results (Hoffman2)
+To be provided by Amy.
