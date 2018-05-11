@@ -1,0 +1,57 @@
+#!/bin/bash
+CURR_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+source $CURR_DIR/globals.sh
+
+pipeline_script=$CURR_DIR/pipeline.sh
+
+if [ $# -lt 1 ]; then
+    echo "USAGE: $0 sample_id"
+    exit 0;
+fi
+
+sample=$1
+
+function send_update {
+  local ret=$1;
+  local log=$2;
+  local msg=msg.txt;
+
+  local subject="";
+  if [ "$ret" -ne 0 ]; then
+    subject="Sample $sample failed"
+  else
+    subject="Sample $sample successful"
+  fi
+
+  echo "Logs:" > $msg;
+  echo "----------------------------" >> $msg;
+  cat $log >> $msg
+  echo "" >> $msg;
+  
+  echo "Available disk space:" >> $msg;
+  echo "----------------------------" >> $msg;
+  df -h | grep "local" >> $msg;
+  echo "" >> $msg;
+  
+  # show top 5 processes
+  echo "Top 5 CPU Processes" >> $msg;
+  echo "----------------------------" >> $msg;
+  ps aux | sort -nrk 3,3 | head -n 5 >> $msg;
+  echo "" >> $msg;
+  echo "End of message" >> $msg;
+
+  aws sns publish --region us-west-2 --topic-arn $topic_arn --subject "$subject" --message file://$msg;
+
+  rm -f $msg;
+}
+
+function run_command {
+  local cmd="$1";
+  local log=$2;
+  $cmd &> $log;
+  send_update $? $log;
+}
+
+run_command "$pipeline_script $sample" ${sample}.log
+aws s3 cp ${sample}.log s3://$output_s3_bucket/$sample_id/
+rm ${sample}.log

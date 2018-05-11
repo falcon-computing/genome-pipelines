@@ -1,0 +1,15 @@
+#!/bin/bash
+# global settings
+input_s3_bucket=
+output_s3_bucket=
+topic_arn=
+ref_dir=
+
+ref_genome=$ref_dir/Homo_sapiens_assembly38.fasta
+dbsnp=$ref_dir/common_all_20170710_sorted.vcf.gz
+cosmic=$ref_dir/Cosmic_CodingMuts_sorted_assembly.vcf.gz
+snpEff_db="GRCh38.86"
+intv=$ref_dir/lib-prep-WES.bed
+
+FALCON_DIR=/usr/local/falcon
+PICARD=$FALCON_DIR/tools/package/picard.jar
