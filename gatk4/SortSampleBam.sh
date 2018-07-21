@@ -1,7 +1,5 @@
 source ./global.sh
 
-outDir="/genome/ssd2/peipei/output"
-tmpDir="/genome/ssd2/peipei/output/tmp"
 
 java -Dsamjdk.compression_level=2 -Xms4000m -jar $picardJar \
   SortSam \

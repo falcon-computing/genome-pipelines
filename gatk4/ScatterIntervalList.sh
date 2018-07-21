@@ -9,7 +9,6 @@ fi
 scatterCount=$1
 scatterListDir=${outDir}/scatterList_${scatterCount}
 
-tmpDir="/genome/ssd2/peipei/output/tmp"
 set -e
 mkdir $scatterListDir
 java -Xms1g -jar $picardJar \

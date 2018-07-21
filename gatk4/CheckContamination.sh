@@ -1,6 +1,4 @@
 source ./global.sh
-outDir="/genome/ssd2/peipei/output"
-refDir="/genome/disk2/peipei/1reference"
 
 $VerifyBamID \
 --Verbose \

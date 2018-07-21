@@ -5,7 +5,6 @@ set -e
 
 
 
-outDir="/genome/ssd2/peipei/output"
 #input_bam="${bamDir}/NA12878_falcon.query.sorted.unmapped.bam"
 input_bam="${bamDir}/${base_file_name}.query.sorted.unmapped.bam"
 unmapped_bam_basename=`basename $input_bam .unmapped.bam` 

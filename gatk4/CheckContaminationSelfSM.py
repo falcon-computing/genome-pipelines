@@ -1,10 +1,11 @@
 import csv
 import sys
 
-#outDir=sys.argv[1]
-outDir="/genome/ssd2/peipei/output"
+#outDir="/genome/ssd2/peipei/output"
+outDir=sys.argv[1]
+base_file_name=sys.argv[2]
 
-with open(outDir+'/NA12878_falcon.preBqsr.selfSM') as selfSM:
+with open(outDir+'/'+base_file_name+'.preBqsr.selfSM') as selfSM:
 #with open('/genome/ssd2/peipei/output/NA12878_falcon.preBqsr.selfSM') as selfSM:
   reader = csv.DictReader(selfSM, delimiter='\t')
   i = 0

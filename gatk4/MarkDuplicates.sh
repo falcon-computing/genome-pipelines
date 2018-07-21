@@ -1,6 +1,5 @@
 source ./global.sh
 
-outDir="/genome/ssd2/peipei/output"
 input_bam="${bamDir}/${base_file_name}.query.sorted.unmapped.bam"
 unmapped_bam_basename=`basename $input_bam .unmapped.bam` 
 #or unmapped_bam_basename="${base_file_name}.query.sorted"
