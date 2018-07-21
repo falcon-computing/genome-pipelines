@@ -37,7 +37,7 @@ wait
 
 # HTC
 
-# ScatterIntervalList.sh only needs run one time
+# ScatterIntervalList.sh only needs run 1 time
 ./ScatterIntervalList.sh $scatterCount
 python ./ScatterIntervalListRename.py $scatterCount $outDir
 ./ScatterIntervalListGather.sh $scatterCount
