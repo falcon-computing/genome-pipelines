@@ -7,7 +7,7 @@ totalLineNum=19
 bamStr=""
 for lineNum in `seq 1 $totalLineNum`;do
 applybqsrDir="${outDir}/applybqsr/${lineNum}"
-bamStr="${bamStr}INPUT=${applybqsrDir}/NA12878_falcon.aligned.duplicates_marked.recalibrated.bam "
+bamStr="${bamStr}INPUT=${applybqsrDir}/${base_file_name}.aligned.duplicates_marked.recalibrated.bam "
 done
 
 #echo $bamStr
@@ -15,6 +15,6 @@ done
 java -Dsamjdk.compression_level=2 -Xms2000m -jar $picardJar \
   GatherBamFiles \
   $bamStr \
-  OUTPUT=${outDir}/NA12878_falcon.bam \
+  OUTPUT=${outDir}/${base_file_name}.bam \
   CREATE_INDEX=true \
   CREATE_MD5_FILE=true

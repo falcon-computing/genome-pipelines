@@ -5,10 +5,6 @@ if [ "$#" -ne 1 ]; then
     exit
 fi
 
-outDirFC="/genome/ssd2/peipei/output/copyFromFireCloud"
-outDir="/genome/ssd2/peipei/output"
-refDir="/genome/ssd2/peipei/1reference"
-outDirFC=$outDir
 
 scatterCount=$1
 scatterListDir=${outDir}/scatterList_${scatterCount}

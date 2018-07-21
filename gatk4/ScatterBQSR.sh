@@ -1,5 +1,7 @@
+source ./global.sh
+
 for i in `seq 1 18`; do
-    ./BaseRecalibrator.sh $i > debug/debug_bqsr_line${i}.stdout.log 2> debug/debug_bqsr_line${i}.stderr.log &
+    ./BaseRecalibrator.sh $i > debug/debug_bqsr_${base_file_name}_line${i}.stdout.log 2> debug/debug_bqsr_${base_file_name}_line${i}.stderr.log &
     pids[${i}]=$!
 done
 

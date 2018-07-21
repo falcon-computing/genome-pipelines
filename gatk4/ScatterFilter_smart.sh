@@ -12,7 +12,7 @@ do
 
 echo $start $end
 for i in `seq $start $end`; do
-    ./FilterVcf.sh $scatterCount $i > debug/debug_filtervcf_smart_line${i}.stdout.log 2> debug/debug_filtervcf_smart_line${i}.stderr.log &
+    ./FilterVcf.sh $scatterCount $i > debug/debug_filtervcf_smart_${base_file_name}_line${i}.stdout.log 2> debug/debug_filtervcf_smart_${base_file_name}_line${i}.stderr.log &
     pids[${i}]=$!
 done
 

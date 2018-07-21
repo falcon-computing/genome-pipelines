@@ -23,9 +23,9 @@ $gatk4Tool --java-options "-XX:+PrintFlagsFinal -XX:+PrintGCTimeStamps -XX:+Prin
   --create-output-bam-md5 \
   --add-output-sam-program-record \
   -R ${refDir}/Homo_sapiens_assembly38.fasta \
-  -I ${outDir}/NA12878_falcon.aligned.duplicate_marked.sorted.bam \
+  -I ${outDir}/${base_file_name}.aligned.duplicate_marked.sorted.bam \
   --use-original-qualities \
-  -O ${applybqsrDir}/NA12878_falcon.aligned.duplicates_marked.recalibrated.bam \
-  -bqsr ${outDir}/NA12878_falcon.recal_data.csv \
+  -O ${applybqsrDir}/${base_file_name}.aligned.duplicates_marked.recalibrated.bam \
+  -bqsr ${outDir}/${base_file_name}.recal_data.csv \
   --static-quantized-quals 10 --static-quantized-quals 20 --static-quantized-quals 30 \
   $listStr

@@ -21,9 +21,9 @@ $gatk4Tool --java-options "-XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -XX:+PrintF
   -Xloggc:gc_log.log -Xms4000m" \
   BaseRecalibrator \
   -R ${refDir}/Homo_sapiens_assembly38.fasta \
-  -I ${outDir}/NA12878_falcon.aligned.duplicate_marked.sorted.bam \
+  -I ${outDir}/${base_file_name}.aligned.duplicate_marked.sorted.bam \
   --use-original-qualities \
-  -O ${bqsrDir}/NA12878_falcon.recal_data.csv \
+  -O ${bqsrDir}/${base_file_name}.recal_data.csv \
   -known-sites ${refDir}/Homo_sapiens_assembly38.dbsnp138.vcf \
   -known-sites ${refDir}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz -known-sites ${refDir}/Homo_sapiens_assembly38.known_indels.vcf.gz \
   $listStr

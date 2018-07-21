@@ -1,11 +1,12 @@
 source ./global.sh
 
-if [ "$#" -ne 1 ]; then
-    echo "./MergeVcf.sh #totalScatterCount "
+if [ "$#" -ne 2 ]; then
+    echo "./MergeVcf.sh #totalScatterCount #filterFlag "
 
     exit
 fi
 
+filterFlag=$2
 
 export _JAVA_OPTIONS=-Djava.io.tmpdir="$tmpDir"
 export TMPDIR="$tmpDir"
@@ -17,11 +18,15 @@ scatterListGatherDir=${scatterListDir}_Gather
 filterVcfStr=""
 for currentCount in `seq 1 $scatterCount`;do
 htcDir=${outDir}/htc/${currentCount}
-filterVcfStr="${filterVcfStr}INPUT=${htcDir}/NA12878_falcon.filtered.vcf.gz "
+if [ $filterFlag -eq "0" ];then 
+filterVcfStr="${filterVcfStr}INPUT=${htcDir}/${base_file_name}.vcf.gz "
+else
+filterVcfStr="${filterVcfStr}INPUT=${htcDir}/${base_file_name}.filtered.vcf.gz "
+fi
 done
 
 echo $filterVcfStr
 java -Xms2000m -jar $picardJar \
   MergeVcfs \
   $filterVcfStr \
-  OUTPUT=${outDir}/NA12878_falcon.filtered.vcf.gz
+  OUTPUT=${outDir}/${base_file_name}.filtered.vcf.gz

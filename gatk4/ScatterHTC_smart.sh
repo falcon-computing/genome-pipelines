@@ -1,3 +1,5 @@
+source ./global.sh
+
 if [ "$#" -ne 2 ]; then
     echo "./ScatterHTC_smart.sh #totalScatterCount #parallelCount"
     exit
@@ -12,7 +14,7 @@ do
 
 echo $start $end
 for i in `seq $start $end`; do
-    ./HaplotypeCaller.sh $scatterCount $i > debug/debug_htc_smart_line${i}.stdout.log 2> debug/debug_htc_smart_line${i}.stderr.log &
+    ./HaplotypeCaller.sh $scatterCount $i > debug/debug_htc_smart_${base_file_name}_line${i}.stdout.log 2> debug/debug_htc_smart_${base_file_name}_line${i}.stderr.log &
     pids[${i}]=$!
 done
 

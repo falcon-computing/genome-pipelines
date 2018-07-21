@@ -18,13 +18,13 @@ htcDir=${outDir}/htc/${currentCount}
 
 mkdir -p $htcDir
 
-contaminationValue=`python CheckContaminationSelfSM.py`
+contaminationValue=`python CheckContaminationSelfSM.py $outDir $base_file_name`
 echo $contaminationValue
 
 $gatk4Tool --java-options "-Dfile.encoding=UTF-8 -Xms6000m -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10" \
   HaplotypeCaller \
   -R ${refDir}/Homo_sapiens_assembly38.fasta \
-  -I ${outDir}/NA12878_falcon.bam \
+  -I ${outDir}/${base_file_name}.bam \
   -L ${scatterListGatherDir}/${currentCount}scattered.interval_list \
-  -O ${htcDir}/NA12878_falcon.vcf.gz \
+  -O ${htcDir}/${base_file_name}.vcf.gz \
   -contamination $contaminationValue

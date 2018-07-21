@@ -3,14 +3,15 @@ set -o pipefail
 set -e
 
 
-bamDir="/genome/ssd2/peipei/0inputUnmappedBAM"
-refDir="/genome/ssd2/peipei/1reference"
-#refDir="/genome/disk2/peipei/1reference"
+
+
 outDir="/genome/ssd2/peipei/output"
-input_bam="${bamDir}/NA12878_falcon.query.sorted.unmapped.bam"
+#input_bam="${bamDir}/NA12878_falcon.query.sorted.unmapped.bam"
+input_bam="${bamDir}/${base_file_name}.query.sorted.unmapped.bam"
 unmapped_bam_basename=`basename $input_bam .unmapped.bam` 
-#unmapped_bam_basename="NA12878_falcon.query.sorted"
+#or unmapped_bam_basename="${base_file_name}.query.sorted"
 output_bam_basename="${unmapped_bam_basename}.aligned.unsorted"
+#or output_bam_basename="${base_file_name}.query.sorted.aligned.unsorted"
 
 # set the bash variable needed for the command-line
 ref_fasta="${refDir}/Homo_sapiens_assembly38.fasta"
@@ -54,8 +55,8 @@ if [ -s $ref_alt ]; then
     UNMAP_CONTAMINANT_READS=true \
     ADD_PG_TAG_TO_READS=false
 
-  grep -m1 "read .* ALT contigs" ${output_bam_basename}.bwa.stderr.log | \
-  grep -v "read 0 ALT contigs"
+  #grep -m1 "read .* ALT contigs" ${output_bam_basename}.bwa.stderr.log | \
+  #grep -v "read 0 ALT contigs"
 
 # else ref_alt is empty or could not be found
 else

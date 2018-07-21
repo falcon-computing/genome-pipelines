@@ -6,11 +6,11 @@ export TMPDIR="$tmpDir"
 rptStr=""
 for lineNum in `seq 1 18`;do
 bqsrDir="${outDir}/bqsr/${lineNum}"
-rptStr="${rptStr}-I ${bqsrDir}/NA12878_falcon.recal_data.csv "
+rptStr="${rptStr}-I ${bqsrDir}/${base_file_name}.recal_data.csv "
 done 
 echo $rptStr
 
 $gatk4Tool --java-options "-Xms3000m" \
   GatherBQSRReports \
   $rptStr \
-  -O ${outDir}/NA12878_falcon.recal_data.csv
+  -O ${outDir}/${base_file_name}.recal_data.csv
