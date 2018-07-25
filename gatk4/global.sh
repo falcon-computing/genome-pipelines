@@ -1,4 +1,4 @@
-base_file_name="NA12892_falcon"
+base_file_name="NA12878_Garvan_falcon"
 #tool
 #picardJar="/curr/peipei/falcon/tools/package/picard.jar"
 #Picard version: 2.15.0-SNAPSHOT

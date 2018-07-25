@@ -2,6 +2,7 @@ source ./global.sh
 set -o pipefail
 set -e
 
+bwaThread=$1
 
 
 
@@ -24,7 +25,7 @@ if [ -s $ref_alt ]; then
     FASTQ=/dev/stdout \
     INTERLEAVE=true \
     NON_PF=true | \
-  $bwa mem -K 100000000 -p -v 3 -t 16 -Y $bash_ref_fasta /dev/stdin - 2> >(tee ${output_bam_basename}.bwa.stderr.log >&2) | \
+  $bwa mem -K 100000000 -p -v 3 -t $bwaThread -Y $bash_ref_fasta /dev/stdin - 2> >(tee ${output_bam_basename}.bwa.stderr.log >&2) | \
   java -Dsamjdk.compression_level=2 -Xms3000m -jar $picardJar \
     MergeBamAlignment \
     VALIDATION_STRINGENCY=SILENT \
@@ -47,7 +48,7 @@ if [ -s $ref_alt ]; then
     PRIMARY_ALIGNMENT_STRATEGY=MostDistant \
     PROGRAM_RECORD_ID="bwamem" \
     PROGRAM_GROUP_VERSION="0.7.15-r1140" \
-    PROGRAM_GROUP_COMMAND_LINE="bwa mem -K 100000000 -p -v 3 -t 16 -Y $bash_ref_fasta" \
+    PROGRAM_GROUP_COMMAND_LINE="bwa mem -K 100000000 -p -v 3 -t $bwaThread -Y $bash_ref_fasta" \
     PROGRAM_GROUP_NAME="bwamem" \
     UNMAPPED_READ_STRATEGY=COPY_TO_TAG \
     ALIGNER_PROPER_PAIR_FLAGS=true \

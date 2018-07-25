@@ -9,7 +9,7 @@ scatterCount=$1
 parallelCount=$2
 start=1
 end=$((start+parallelCount-1))
-while [ $start -lt $scatterCount ]
+while [ $start -le $scatterCount ]
 do
 
 echo $start $end

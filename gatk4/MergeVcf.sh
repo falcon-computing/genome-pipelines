@@ -29,4 +29,4 @@ echo $filterVcfStr
 java -Xms2000m -jar $picardJar \
   MergeVcfs \
   $filterVcfStr \
-  OUTPUT=${outDir}/${base_file_name}.filtered.vcf.gz
+  OUTPUT=${outDir}/${base_file_name}.filtered_${filterFlag}.vcf.gz
