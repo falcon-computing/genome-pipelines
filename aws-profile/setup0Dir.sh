@@ -4,6 +4,7 @@ curUser="centos"
 refDir="/local/ref"
 fastqDir="/local/fastq"
 mutect2Dir="/local/mutect2"
+mutect2gatk3Dir="/local/mutect2gatk3"
 falconScriptsDir="/local/falcon"
 
 if [ -d "$refDir" ];then
@@ -24,6 +25,16 @@ sudo mkdir -p $fastqDir
 sudo chmod a+w $fastqDir
 sudo chown $curUser $fastqDir
 echo "mkdir $fastqDir"
+fi
+
+if [ -d "$mutect2gatk3Dir" ];then
+echo "$mutect2gatk3Dir exists"
+else
+echo "$mutect2gatk3Dir does not exist!"
+sudo mkdir -p $mutect2gatk3Dir
+sudo chmod a+w $mutect2gatk3Dir
+sudo chown $curUser $mutect2gatk3Dir
+echo "mkdir $mutect2gatk3Dir"
 fi
 
 if [ -d "$mutect2Dir" ];then
