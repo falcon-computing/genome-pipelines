@@ -24,7 +24,8 @@ ${WORK_DIR}/scripts2DownloadMutect2gatk3.sh
 #
 #${WORK_DIR}/scripts1Download.sh NA12878-Garvan; 
 #
-##upload log
-#${WORK_DIR}/scripts3.sh
+
+#upload log
+${WORK_DIR}/scripts3.sh
 
 
